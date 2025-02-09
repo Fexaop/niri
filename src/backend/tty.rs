@@ -755,8 +755,10 @@ impl Tty {
                 self.refresh_ipc_outputs(niri);
 
                 niri.notify_activity();
-                niri.monitors_active = true;
+
                 self.set_monitors_active(true);
+                niri.activate_monitors_without_backend();
+
                 niri.queue_redraw_all();
             }
         }

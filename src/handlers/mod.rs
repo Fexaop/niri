@@ -82,6 +82,9 @@ use crate::protocols::foreign_toplevel::{
 use crate::protocols::gamma_control::{GammaControlHandler, GammaControlManagerState};
 use crate::protocols::mutter_x11_interop::MutterX11InteropHandler;
 use crate::protocols::output_management::{OutputManagementHandler, OutputManagementManagerState};
+use crate::protocols::output_power_management::{
+    self, OutputPowerManagementHandler, OutputPowerManagementManagerState,
+};
 use crate::protocols::screencopy::{Screencopy, ScreencopyHandler, ScreencopyManagerState};
 use crate::utils::{output_size, send_scale_transform};
 
@@ -834,6 +837,33 @@ impl OutputManagementHandler for State {
     fn apply_output_config(&mut self, config: niri_config::Outputs) {
         self.niri.config.borrow_mut().outputs = config;
         self.reload_output_config();
+    }
+}
+
+impl OutputPowerManagementHandler for State {
+    fn output_power_manager_state(&mut self) -> &mut OutputPowerManagementManagerState {
+        &mut self.niri.output_power_management_state
+    }
+
+    fn get_output_power_mode(&mut self, output: &Output) -> output_power_management::Mode {
+        // todo: per-output power management
+        let _ = output;
+
+        self.niri.monitors_active.into()
+    }
+
+    fn set_output_power_mode(&mut self, output: &Output, mode: output_power_management::Mode) {
+        // todo: per-output power management
+        let _ = output;
+
+        match mode {
+            output_power_management::Mode::Off => {
+                self.niri.deactivate_monitors(&mut self.backend);
+            }
+            output_power_management::Mode::On => {
+                self.niri.activate_monitors(&mut self.backend);
+            }
+        }
     }
 }
 
